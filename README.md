@@ -32,15 +32,15 @@ API REST do Kontrollar para autenticação e perfil de usuários (nome, sobrenom
 ## 📦 Instalação
 
 ```bash
-git clone <seu-repo-backend>.git
+git clone https://github.com/ferpgshy/kontrollar-backend
 cd kontrollar-backend
 npm i
-cp .env.example .env   # edite as variáveis
+cp .env.example .env
 ```
 
 > Estrutura de instalação baseada no formato do README principal.&#x20;
 
-### `.env` (exemplo)
+### `.env`
 
 ```
 PORT=3000
@@ -76,10 +76,8 @@ CREATE TABLE IF NOT EXISTS users (
   CONSTRAINT uf_valid CHECK (uf IS NULL OR uf ~ '^[A-Z]{2}$')
 );
 
--- email único (case-insensitive)
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_idx ON users (LOWER(email));
 
--- trigger updated_at
 CREATE OR REPLACE FUNCTION trg_set_updated_at() RETURNS trigger AS $$
 BEGIN NEW.updated_at := NOW(); RETURN NEW; END $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS set_updated_at ON users;
