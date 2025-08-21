@@ -38,8 +38,6 @@ npm i
 cp .env.example .env
 ```
 
-> Estrutura de instalação baseada no formato do README principal.&#x20;
-
 ### `.env`
 
 ```
