@@ -3,11 +3,9 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-em%20desenvolvimento-yellow?style=flat-square" />
-  <img src="https://img.shields.io/badge/backend-Fastify%20%7C%20PostgreSQL-blue?style=flat-square" />
-  <img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/license-Custom-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/badge/feito%20com-HTML%20%7C%20JS%20%7C%20Node.js-blue?style=flat-square" />
 </p>
-
-> Estilo e layout inspirados no README do projeto principal.&#x20;
 
 ---
 
