@@ -5,6 +5,7 @@ import cors from '@fastify/cors';
 
 import authRoutes from './routes/auth.routes.js';
 import usersRoutes from './routes/perfil.routes.js';
+import projectsRoutes from './routes/projects.routes.js'
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ api.get('/', (_req, reply) => {
 // Rotas
 await api.register(authRoutes);  
 await api.register(usersRoutes); 
+await api.register(projectsRoutes);
 
 const PORT = process.env.PORT || 3333;
 const start = async () => {

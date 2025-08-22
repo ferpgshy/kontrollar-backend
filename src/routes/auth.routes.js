@@ -1,4 +1,3 @@
-// routes/auth.routes.js
 import bcrypt from 'bcryptjs';
 import {
   createUser,
@@ -61,7 +60,6 @@ export default async function authRoutes(api) {
       const ok = await bcrypt.compare(senha, user.senha_hash || '');
       if (!ok) return rep.code(401).send({ error: 'Credenciais inválidas.' });
 
-      // montar payload "seguro" pro frontend
       const safe = await getUserById(user.id);
       rep.send(safe);
     } catch (err) {
@@ -70,7 +68,6 @@ export default async function authRoutes(api) {
     }
   });
 
-  // Solicitar recuperação (stub)
   api.post('/auth/request-reset', async (req, rep) => {
     try {
       const { email } = req.body || {};
