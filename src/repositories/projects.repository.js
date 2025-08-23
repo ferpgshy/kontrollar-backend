@@ -1,12 +1,22 @@
-import pool from '../infra/db.js'
+// repositories/projects.repository.js
+import pool from '../infra/db.js';
 
+// >>> Deixe TODAS as colunas qualificadas com "p."
 const PROJECT_FIELDS = `
-  id, name, description, status, priority, progress_pct, deadline,
-  manager_id, created_at, updated_at
+  p.id AS id,
+  p.name AS name,
+  p.description AS description,
+  p.status AS status,
+  p.priority AS priority,
+  p.progress_pct AS progress_pct,
+  p.deadline AS deadline,
+  p.manager_id AS manager_id,
+  p.created_at AS created_at,
+  p.updated_at AS updated_at
 `;
 
+// Opções fixas (se tiver /options no backend, pode manter)
 export async function listStatusOptions() {
-  // usando CHECK/VALORES fixos no back
   return ['Planejamento','Em Andamento','Em Desenvolvimento','Quase Concluído','Concluído'];
 }
 export async function listPriorityOptions() {
@@ -61,7 +71,7 @@ export async function createProject(data) {
     `INSERT INTO projects
       (name, description, status, priority, progress_pct, deadline, manager_id)
      VALUES ($1,$2,$3,$4,$5,$6,$7)
-     RETURNING ${PROJECT_FIELDS}`,
+     RETURNING id, name, description, status, priority, progress_pct, deadline, manager_id, created_at, updated_at`,
     [name, description, status, priority, progress_pct, deadline, manager_id]
   );
   return rows[0];
@@ -72,7 +82,6 @@ export async function updateProject(id, data = {}) {
   const entries = Object.entries(data).filter(([k, v]) => allowed.includes(k) && v !== undefined);
   if (!entries.length) return await getProjectById(id);
 
-  // validações leves
   const allowedStatus = await listStatusOptions();
   const allowedPriority = await listPriorityOptions();
   for (const [k,v] of entries) {
@@ -85,9 +94,11 @@ export async function updateProject(id, data = {}) {
   const values = entries.map(([,v]) => v);
 
   const { rows } = await pool.query(
-    `UPDATE projects SET ${set}
-      WHERE id = $${values.length + 1}
-      RETURNING ${PROJECT_FIELDS}`,
+    `UPDATE projects p SET ${set}
+      WHERE p.id = $${values.length + 1}
+      RETURNING p.id AS id, p.name AS name, p.description AS description, p.status AS status,
+                p.priority AS priority, p.progress_pct AS progress_pct, p.deadline AS deadline,
+                p.manager_id AS manager_id, p.created_at AS created_at, p.updated_at AS updated_at`,
     [...values, id]
   );
   return rows[0] || null;
@@ -95,7 +106,10 @@ export async function updateProject(id, data = {}) {
 
 export async function deleteProject(id) {
   const { rows } = await pool.query(
-    `DELETE FROM projects WHERE id = $1 RETURNING ${PROJECT_FIELDS}`,
+    `DELETE FROM projects p WHERE p.id = $1
+     RETURNING p.id AS id, p.name AS name, p.description AS description, p.status AS status,
+               p.priority AS priority, p.progress_pct AS progress_pct, p.deadline AS deadline,
+               p.manager_id AS manager_id, p.created_at AS created_at, p.updated_at AS updated_at`,
     [id]
   );
   return rows[0] || null;
@@ -119,16 +133,11 @@ export async function replaceMembers(project_id, user_ids = [], role = 'Membro')
     await pool.query('DELETE FROM project_members WHERE project_id = $1', [project_id]);
 
     if (user_ids.length) {
-      const values = [];
-      const params = [];
-      user_ids.forEach((uid, i) => {
-        params.push(`($1, $${i+2}, $${user_ids.length+2})`);
-        values.push(uid);
-      });
+      const placeholders = user_ids.map((_, i) => `($1, $${i+2}, $${user_ids.length+2})`).join(', ');
       await pool.query(
         `INSERT INTO project_members (project_id, user_id, role)
-         VALUES ${params.join(', ')}`,
-        [project_id, ...values, role]
+         VALUES ${placeholders}`,
+        [project_id, ...user_ids, role]
       );
     }
 
@@ -143,10 +152,10 @@ export async function replaceMembers(project_id, user_ids = [], role = 'Membro')
 export async function searchUsersByName(q = '', { limit = 20 } = {}) {
   const term = `%${q.trim()}%`;
   const { rows } = await pool.query(
-    `SELECT id, (nome || ' ' || sobrenome) AS name, email, cargo
-       FROM users
-      WHERE (nome || ' ' || sobrenome) ILIKE $1
-      ORDER BY nome, sobrenome
+    `SELECT u.id, (u.nome || ' ' || u.sobrenome) AS name, u.email, u.cargo
+       FROM users u
+      WHERE (u.nome || ' ' || u.sobrenome) ILIKE $1
+      ORDER BY u.nome, u.sobrenome
       LIMIT $2`,
     [term, limit]
   );
